@@ -70,7 +70,7 @@ def do_index_get(row_index):
         plt.savefig(fout, dpi=150)
         plt.gca().clear()
         b64_encoded = base64.b64encode(fout.getbuffer()).decode("ascii")
-        b64_jpeg = f"data:image/jpeg;base64,{b64_encoded}"
+        b64_jpeg = "data:image/jpeg;base64,{}".format(b64_encoded)
 
     duration = row["wav_filesize"] / rate / 2
     transcript = row["transcript"]

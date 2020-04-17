@@ -11,7 +11,9 @@ from stt_sample_inspector.utils import read_csv_and_absolutify
 def parse_args(args):
     parser = argparse.ArgumentParser(description="Run the tool.")
     parser.add_argument(
-        "--version", action="version", version=f"stt_sample_inspector {__version__}"
+        "--version",
+        action="version",
+        version="stt_sample_inspector {}".format(__version__),
     )
     parser.add_argument("in_csv_file", help="Path to input CSV file.")
     parser.add_argument("out_csv_file", help="Path to save modified CSV file.")
