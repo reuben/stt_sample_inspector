@@ -27,6 +27,17 @@
       ]
     });
     wavesurfer.load("{{ audio_url }}");
+    wavesurfer.on("ready", function() {
+      let autoplayCookieValue = document.cookie.replace(/(?:(?:^|.*;\s*)autoplay\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+      if (autoplayCookieValue === "1") {
+        wavesurfer.play();
+      }
+    });
+
+    let autoplayCookieValue = document.cookie.replace(/(?:(?:^|.*;\s*)autoplay\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    if (autoplayCookieValue === "1") {
+      document.getElementById("checkbox-autoplay").checked = true;
+    }
 
     function do_prev(e) {
       {% if has_prev %}
@@ -66,6 +77,22 @@
     function do_focusnav() {
       transcript_input.blur();
       document.body.focus();
+    }
+
+    function do_toggleautoplay(e) {
+      let autoplayCookieValue = document.cookie.replace(/(?:(?:^|.*;\s*)autoplay\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+      let autoplayCheckbox = document.getElementById("checkbox-autoplay");
+      let uiValue = autoplayCheckbox.checked;
+      if (autoplayCookieValue === "") {
+        document.cookie = "autoplay=" + uiValue ? "1" : "0";
+      }
+      if (autoplayCookieValue === "0") {
+        document.cookie = "autoplay=" + "1";
+        autoplayCheckbox.checked = true;
+      } else {
+        document.cookie = "autoplay=" + "0";
+        autoplayCheckbox.checked = false;
+      }
     }
 
     let transcript_input = document.getElementById("transcript");
@@ -117,6 +144,10 @@
     });
     document.getElementById("btn-savetranscript").addEventListener("click", function() {
       do_savetranscript();
+    });
+    document.getElementById("btn-autoplay").addEventListener("click", function(e) {
+      do_toggleautoplay();
+      e.preventDefault(); // stop clicks on the checkbox or label from being undone
     });
   });
   </script>
@@ -187,6 +218,10 @@
       <button id="btn-next" class="btn btn-primary" {%+ if not has_next %}disabled{% endif %}>
         <i class="fas fa-chevron-right"></i>
         Next sample
+      </button>
+      <button id="btn-autoplay" class="btn btn-outline-primary">
+        <input type="checkbox" name="checkbox-autoplay" id="checkbox-autoplay"/>
+        <label for="checkbox-autoplay" class="form-check-label">Autoplay samples on load</label>
       </button>
     </div>
     <form id="form" method="POST" class="transcript-form">
