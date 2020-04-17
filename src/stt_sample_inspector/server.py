@@ -24,7 +24,7 @@ def create_app(df=None, flask_test_config=None):
     app = Flask(__name__)
 
     # If no dataframe specified, create dummy one for development
-    if df is not None:
+    if df is None:
         here = Path(__file__).parent
         df, _ = read_csv_and_absolutify(here / "sample_data" / "ldc93s1.csv")
 
