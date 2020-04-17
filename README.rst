@@ -22,4 +22,6 @@ This is a Python library. The user can load the CSV with Pandas, do whatever fil
 
 The module also provides convenience functions to make relative paths in the CSV absolute: ``stt_sample_inspector.utils.read_csv_and_absolutify`` (read from a file path) and ``stt_sample_inspector.utils.create_abs_column`` (create the column given a DataFrame and the folder to make paths relative to) The ``abs_wav_filename`` column created by those functions is required by the tool.
 
-In addition, the package provides a CLI tool which takes two CSV files as parameters, one as input and one was output, where the modified DataFrame will be written to once the user is done editing.
+In addition, the package provides a CLI tool which takes two CSV files as parameters, one as input and one was output, where the modified DataFrame will be written to once the user is done editing:
+
+``stt_sample_inspector input.csv output.csv``
