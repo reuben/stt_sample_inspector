@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="next" href="{{ next_url }}">
+  <link rel="prefetch" href="{{ prev_url }}">
+  <script src="{{ url_for('static', filename='wavesurfer/wavesurfer.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='wavesurfer/wavesurfer.cursor.min.js') }}"></script>
+  <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    let wave_container = document.getElementById("waveform");
+    let wavesurfer = WaveSurfer.create({
+      container: wave_container,
+      normalize: true,
+      backend: "MediaElement",
+      plugins: [
+        WaveSurfer.cursor.create({
+          showTime: true,
+          opacity: 1,
+          customShowTimeStyle: {
+            "background-color": "#000",
+            "color": "#fff",
+            "padding": "2px",
+            "font-size": "10px",
+          },
+        }),
+      ]
+    });
+    wavesurfer.load("{{ audio_url }}");
+
+    function do_prev(e) {
+      {% if has_prev %}
+      if (e) {
+        e.preventDefault();
+      }
+      window.location.href = "{{ prev_url }}";
+      {% endif %}
+    }
+
+    function do_next(e) {
+      {% if has_next %}
+      if (e) {
+        e.preventDefault();
+      }
+      window.location.href = "{{ next_url }}";
+      {% endif %}
+    }
+
+    function do_playpause() {
+      wavesurfer.playPause();
+    }
+
+    function do_playstart() {
+      wavesurfer.stop();
+      wavesurfer.play();
+    }
+
+    function do_focustranscript() {
+      transcript_input.focus();
+    }
+
+    function do_savetranscript() {
+      document.getElementById("form").submit();
+    }
+
+    function do_focusnav() {
+      transcript_input.blur();
+      document.body.focus();
+    }
+
+    let transcript_input = document.getElementById("transcript");
+    document.body.addEventListener("keydown", function(e) {
+      // Don't override keys if transcript is being edited
+      if (e.target == transcript_input) {
+        return;
+      }
+
+      switch (e.key) {
+        case "ArrowLeft":
+          do_prev(e);
+          break;
+        case " ":
+          e.preventDefault();
+          do_playpause();
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          do_playstart();
+          break;
+        case "ArrowRight":
+          do_next(e);
+          break;
+        case "ArrowDown":
+          e.preventDefault();
+          do_focustranscript();
+          break;
+      }
+    });
+    transcript_input.addEventListener("keydown", function(e) {
+      if (e.key == "Escape") {
+        do_focusnav();
+      }
+    });
+
+    // Hook up buttons
+    document.getElementById("btn-prev").addEventListener("click", function() {
+      do_prev();
+    });
+    document.getElementById("btn-playpause").addEventListener("click", function() {
+      do_playpause();
+    });
+    document.getElementById("btn-playstart").addEventListener("click", function() {
+      do_playstart();
+    });
+    document.getElementById("btn-next").addEventListener("click", function() {
+      do_next();
+    });
+    document.getElementById("btn-savetranscript").addEventListener("click", function() {
+      do_savetranscript();
+    });
+  });
+  </script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/fontawesome.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/solid.min.css') }}">
+  <style>
+    #transcript {
+      height: 30px;
+      font-size: 20px;
+    }
+    #waveform {
+      position: relative;
+      width: 73%;
+      left: 7%;
+    }
+    .spectrogram {
+      width: 100%;
+    }
+    .ellipsis {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      direction: rtl;
+      text-align: left;
+    }
+    h3 {
+      width: 100%;
+    }
+    .header {
+      font-size: 25px;
+      font-weight: bold;
+    }
+    #transcript {
+      width: 100%;
+      height: 40px;
+    }
+    .controls {
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+    .controls > button {
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+  </style>
+<body>
+  <div class="container-xl">
+    <div class="row header">
+      <div class="col-md-auto">{{cur_idx}} / {{ num_samples }} - </div>
+      <div class="col ellipsis">file://{{ filename }}</div>
+    </div>
+    <img class="spectrogram" src="{{ spectrogram }}"/>
+    <div id="waveform"></div>
+    <div class="row controls justify-content-center align-items-center">
+      <button id="btn-prev" class="btn btn-primary" {%+ if not has_prev %}disabled{% endif %}>
+        <i class="fas fa-chevron-left"></i>
+        Previous sample
+      </button>
+      <button id="btn-playpause" class="btn btn-primary">
+        <i class="fas fa-play-circle"></i>
+        Play/Pause
+      </button>
+      <button id="btn-playstart" class="btn btn-primary">
+        <i class="fas fa-backward"></i>
+        Play from start
+      </button>
+      <button id="btn-next" class="btn btn-primary" {%+ if not has_next %}disabled{% endif %}>
+        <i class="fas fa-chevron-right"></i>
+        Next sample
+      </button>
+    </div>
+    <form id="form" method="POST" class="transcript-form">
+      <input id="transcript" name="transcript" type="text" value="{{ transcript }}"/>
+    </form>
+    <div class="row controls justify-content-center align-items-center">
+      <button id="btn-savetranscript" class="btn btn-primary">
+        <i class="fas fa-spell-check"></i>
+        Save and go to next sample
+      </button>
+      <form method="POST" action="finish">
+        <button type="submit" id="btn-finish" class="btn btn-secondary">
+          <i class="fas fa-save"></i>
+          Finish editing samples
+        </button>
+      </form>
+    </div>
+    <div class="row"><div class="col-sm-2"></div><div class="col">
+      <table class="table table-sm table-striped">
+        <thead>
+          <tr class="table-primary">
+            <th scope="col">Action</th>
+            <th scope="col">Keyboard shortcut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Play/Pause</th>
+            <th>Space</th>
+          </tr>
+          <tr>
+            <th scope="row">Play from start</th>
+            <th>Up arrow</th>
+          </tr>
+          <tr>
+            <th scope="row">Previous sample</th>
+            <th>Left arrow</th>
+          </tr>
+          <tr>
+            <th scope="row">Next sample</th>
+            <th>Right arrow</th>
+          </tr>
+          <tr>
+            <th scope="row">Focus transcript</th>
+            <th>Down arrow</th>
+          </tr>
+          <tr class="table-secondary">
+            <th scope="row">When transcript field is focused:</th>
+            <th></th>
+          </tr>
+          <tr>
+            <th scope="row">Focus navigation controls</th>
+            <th>Escape</th>
+          </tr>
+          <tr>
+            <th scope="row">Save and go to next sample</th>
+            <th>Enter</th>
+          </tr>
+        </tbody>
+      </table>
+    </div><div class="col-sm-2"></div></div>
+  </div>
+</body>

@@ -1,51 +1,21 @@
 # -*- coding: utf-8 -*-
 import argparse
 import sys
-import logging
+from pathlib import Path
 
 from stt_sample_inspector import __version__
 from stt_sample_inspector.server import run_server
-
-__author__ = "Reuben Morais"
-__copyright__ = "Mozilla Corporation"
-__license__ = "mozilla"
-
-_logger = logging.getLogger(__name__)
+from stt_sample_inspector.utils import read_csv_and_absolutify
 
 
 def parse_args(args):
-    parser = argparse.ArgumentParser(
-        description="Run the tool.")
+    parser = argparse.ArgumentParser(description="Run the tool.")
     parser.add_argument(
-        "--version",
-        action="version",
-        version="stt_sample_inspector {ver}".format(ver=__version__))
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        dest="loglevel",
-        help="set loglevel to INFO",
-        action="store_const",
-        const=logging.INFO)
-    parser.add_argument(
-        "-vv",
-        "--very-verbose",
-        dest="loglevel",
-        help="set loglevel to DEBUG",
-        action="store_const",
-        const=logging.DEBUG)
+        "--version", action="version", version=f"stt_sample_inspector {__version__}"
+    )
+    parser.add_argument("in_csv_file", help="Path to input CSV file.")
+    parser.add_argument("out_csv_file", help="Path to save modified CSV file.")
     return parser.parse_args(args)
-
-
-def setup_logging(loglevel):
-    """Setup basic logging
-
-    Args:
-      loglevel (int): minimum loglevel for emitting messages
-    """
-    logformat = "[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
-    logging.basicConfig(level=loglevel, stream=sys.stdout,
-                        format=logformat, datefmt="%Y-%m-%d %H:%M:%S")
 
 
 def main(args):
@@ -55,8 +25,9 @@ def main(args):
       args ([str]): command line parameter list
     """
     args = parse_args(args)
-    setup_logging(args.loglevel)
-    run_server()
+    df, orig_cols = read_csv_and_absolutify(args.in_csv_file)
+    new_df = run_server(df)
+    new_df.loc[:, orig_cols].to_csv(args.out_csv_file, index=False)
 
 
 def run():
