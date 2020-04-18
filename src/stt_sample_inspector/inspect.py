@@ -59,16 +59,21 @@ def do_index_get(row_index):
     S = librosa.feature.melspectrogram(
         y=samples, sr=rate, n_fft=512, hop_length=320, fmax=rate / 2
     )
-    plt.figure(figsize=(12, 4))
-    img = librosa.display.specshow(
-        librosa.power_to_db(S, ref=np.max), y_axis="mel", fmax=rate / 2, x_axis="time"
+    fig, ax = plt.subplots(figsize=(12, 4))
+    librosa.display.specshow(
+        librosa.power_to_db(S, ref=np.max),
+        y_axis="mel",
+        fmax=rate / 2,
+        x_axis="time",
+        ax=ax,
     )
-    plt.colorbar(format="%+2.0f dB")
-    plt.title("Mel spectrogram")
-    plt.tight_layout()
+    fig.colorbar(
+        mappable=ax.findobj(matplotlib.collections.QuadMesh)[0], format="%+2.0f dB"
+    )
+    ax.set_title("Mel spectrogram")
+    fig.tight_layout()
     with io.BytesIO() as fout:
-        plt.savefig(fout, dpi=150)
-        plt.gca().clear()
+        fig.savefig(fout, dpi=150)
         b64_encoded = base64.b64encode(fout.getbuffer()).decode("ascii")
         b64_jpeg = "data:image/jpeg;base64,{}".format(b64_encoded)
 
