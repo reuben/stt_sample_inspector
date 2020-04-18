@@ -32,7 +32,7 @@ def audio(row_index):
     row = current_app.config["df"].iloc[row_index]
     response = make_response(send_file(row["abs_wav_filename"], mimetype="audio/wav"))
     response.cache_control.public = True
-    response.cache_control.max_age = 3600
+    response.cache_control.max_age = 600
     return response
 
 
@@ -93,7 +93,7 @@ def do_index_get(row_index):
         )
     )
     response.cache_control.public = True
-    response.cache_control.max_age = 300
+    response.cache_control.max_age = 600
     return response
 
 

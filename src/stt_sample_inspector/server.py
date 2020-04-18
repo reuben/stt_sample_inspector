@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import base64
 import os
 from functools import partial
 from pathlib import Path
@@ -30,8 +31,18 @@ def create_app(df=None, flask_test_config=None):
 
     app.config["df"] = df
 
+    # Hash the DataFrame and use this as a global URL prefix to avoid stale caches
+    df_hash = str(hash(tuple(pandas.util.hash_pandas_object(df))))
+    b64_hash = (
+        base64.urlsafe_b64encode(df_hash.encode("ascii"))
+        .decode("ascii")
+        .replace("=", "")
+    )
+
     # Register blueprints
-    app.register_blueprint(inspect.bp)
+    app.register_blueprint(
+        inspect.bp, url_prefix="/{}/{}".format(b64_hash, inspect.bp.url_prefix)
+    )
 
     @app.route("/")
     def index():
