@@ -111,12 +111,3 @@ def index(row_index):
         return do_index_get(row_index)
     else:
         return do_index_post(row_index)
-
-
-@bp.route("/finish", methods=["GET", "POST"])
-def finish():
-    func = request.environ.get("werkzeug.server.shutdown")
-    if func is None:
-        raise RuntimeError("Not running with the Werkzeug Server")
-    func()
-    return "Server shutting down..."

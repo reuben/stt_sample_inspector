@@ -48,6 +48,14 @@ def create_app(df=None, flask_test_config=None):
     def index():
         return redirect(url_for("inspect.index", row_index=0))
 
+    @app.route("/finish", methods=["GET", "POST"])
+    def finish():
+        func = request.environ.get("werkzeug.server.shutdown")
+        if func is None:
+            raise RuntimeError("Not running with the Werkzeug Server.")
+        func()
+        return "Server shutting down..."
+
     return app
 
 
