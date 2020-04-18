@@ -72,7 +72,6 @@ def do_index_get(row_index):
         b64_encoded = base64.b64encode(fout.getbuffer()).decode("ascii")
         b64_jpeg = "data:image/jpeg;base64,{}".format(b64_encoded)
 
-    duration = row["wav_filesize"] / rate / 2
     transcript = row["transcript"]
 
     has_next, next_url, has_prev, prev_url = get_next_prev(row_index)
