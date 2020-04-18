@@ -74,6 +74,7 @@ def do_index_get(row_index):
     fig.tight_layout()
     with io.BytesIO() as fout:
         fig.savefig(fout, dpi=150)
+        plt.close(fig)
         b64_encoded = base64.b64encode(fout.getbuffer()).decode("ascii")
         b64_jpeg = "data:image/jpeg;base64,{}".format(b64_encoded)
 
